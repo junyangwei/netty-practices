@@ -15,3 +15,7 @@ MacOS系统，每次压 HttpServer02 电脑直接黑屏了，建议不要压测�
 ### HttpServer03
 ![HttpServer03](httpserver03.png)
 
+### HttpNettyServer01
+![HttpNettyServer01](../nettyhttpserver01/nettyhttpserver01.png)
+
+通过上面的图可以看出，使用 Netty 做 HTTP 服务端不，性能非常不错
