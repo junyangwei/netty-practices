@@ -151,6 +151,9 @@ public class HttpNettyServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
             }
 
+            // 生成ByteBuf对象后，需要调用release方法，防止出现内存泄漏
+            // 详情参考：https://www.cnblogs.com/zhaoshizi/p/13122467.html
+            content.release();
         }
     }
 
@@ -237,6 +240,15 @@ public class HttpNettyServerHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
+        ctx.close();
+    }
+
+    /**
+     * 捕获客户端主动断开连接后，关闭通道
+     * @param ctx 通道处理器上下文
+     */
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) {
         ctx.close();
     }
 }
