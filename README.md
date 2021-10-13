@@ -16,4 +16,9 @@
     - 确保访问 http://127.0.0.1:8800/test01api/get 路径是，能够在 Netty 服务端，将请求正确地转发给后端服务 test01
 2. nettyhttpserver02 包中的 Netty 服务端示例启动端口为 8800
 3. test01 jar 启动端口为 8801
-
+4. nettyhttpserver02 测试
+    - 按照上面步骤先启动 test01 jar包，再启动 nettyhttpserver02 包 HttpNettyServer 的 main 方法启动服务端
+    - 访问服务端测试地址：http://127.0.0.1:8800/
+    - 访问 test01 GET接口地址：http://127.0.0.1:8801/test01api/get
+    - 访问服务端代理地址：http://127.0.0.1:8800/test01api/get
+    - 访问地址校验不通过(过滤器)地址：http://127.0.0.1:8800/xxx

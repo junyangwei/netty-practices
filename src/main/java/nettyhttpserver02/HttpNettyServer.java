@@ -7,9 +7,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
+import router01.ApiTagEnum;
+
+import java.net.URI;
 
 /**
  * 一个 HTTP 服务器
@@ -53,9 +53,10 @@ public class HttpNettyServer {
                绑定监听端口并启动服务端，将 NioServerSocketChannel 注册到 Selector 上
                Selector 轮询，由 EventLoop 负责调度和执行 Selector 轮询操作
              */
-            Channel ch = b.bind(PORT).sync().channel();
+            URI uri = new URI(ApiTagEnum.DEFAULT.getApiAddress());
+            Channel ch = b.bind(uri.getPort()).sync().channel();
 
-            System.err.println("## Netty HTTP 服务端已启动，地址: " + "http:/127.0.0.1:" + PORT + "/");
+            System.err.println("## Netty HTTP 服务端已启动，地址: " + uri);
             ch.closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();

@@ -1,25 +1,11 @@
 package nettyhttpserver02;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
+import filter01.ProxyBizFilter;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.cookie.Cookie;
-import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
-import io.netty.util.CharsetUtil;
-import nettyhttpclient02.HttpClientHandler;
 import nettyhttpclient02.HttpClient;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import router01.ApiTagEnum;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
@@ -42,10 +28,16 @@ public class HttpNettyServerHandler extends SimpleChannelInboundHandler<Object> 
     private HttpClient test01ApiHttpClient;
 
     /**
+     * 代理业务过滤器
+     */
+    private ProxyBizFilter proxyBizFilter;
+
+    /**
      * Netty HTTP 服务端处理器构造函数
      */
     HttpNettyServerHandler() {
-        test01ApiHttpClient = new HttpClient(8801, "127.0.0.1");
+        this.test01ApiHttpClient = new HttpClient(8801, "127.0.0.1");
+        this.proxyBizFilter = new ProxyBizFilter();
     }
 
     /**
@@ -77,10 +69,14 @@ public class HttpNettyServerHandler extends SimpleChannelInboundHandler<Object> 
 
             System.err.println("## Netty 服务端接收到来自用户的请求:" + request.uri());
 
-            // TODO: 过滤器过滤请求
+            // 过滤器过滤请求 TODO: 可以按需定义过滤器用途
+            if (!proxyBizFilter.filter(request, ctx)) {
+                this.writeFailResponse(ctx);
+                return;
+            }
 
             // TODO: 做路由相关的工作
-            if (request.uri().startsWith("/test01api")) {
+            if (request.uri().startsWith(ApiTagEnum.TEST01.getApiTag())) {
                 test01ApiHttpClient.proxyRequest(ctx, request);
                 return;
             }
@@ -135,5 +131,14 @@ public class HttpNettyServerHandler extends SimpleChannelInboundHandler<Object> 
                 }
             }
         }
+    }
+
+    /**
+     * 写入失败的响应（过滤器过滤失败时调用）
+     * @param ctx 通道处理器上下文
+     */
+    private void writeFailResponse(ChannelHandlerContext ctx) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, NO_CONTENT);
+        ctx.writeAndFlush(response);
     }
 }
